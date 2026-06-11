@@ -78,6 +78,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Debug OIDC token
+        run: |
+          echo "Repo: ${{ github.repository }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Actor: ${{ github.actor }}"
+
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
