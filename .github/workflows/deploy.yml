@@ -11,7 +11,8 @@ permissions:
 
 env:
   AWS_REGION: eu-west-2
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Clears the Node.js deprecation warning
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true 
+  BAKEHOUSE_STACK_NAME: carter-singh-bakehouse # Added your stack name here
 
 jobs:
   setup:
