@@ -10,7 +10,8 @@ permissions:
   contents: read
 
 env:
-  AWS_REGION: eu-west-2 # Adjust this to your required AWS region
+  AWS_REGION: eu-west-2
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Clears the Node.js deprecation warning
 
 jobs:
   setup:
@@ -44,28 +45,22 @@ jobs:
           echo "name=${STUDENT_NAME}" >> $GITHUB_OUTPUT
           echo "Student: ${STUDENT_NAME}"
 
-            - name: Generate enhanced session name
+      - name: Generate enhanced session name
         id: session-naming
         run: |
-        
+          # Clean username for valid AWS characters (Alphanumeric, =,.@_-)
           STUDENT=$(echo "${{ github.actor }}" | sed 's/[^a-zA-Z0-9=,.@_-]//g')
           RUN_ID="${{ github.run_id }}"
           
-
+          # Create base name
           BASE_NAME="gha-cdk-${STUDENT}-${RUN_ID}"
           
-
+          # Strictly truncate to 64 characters maximum
           SESSION_NAME=$(echo "${BASE_NAME}" | cut -c 1-64)
 
           echo "session-name=${SESSION_NAME}" >> $GITHUB_OUTPUT
           echo "Generated safe session name: ${SESSION_NAME}"
           echo "Length: ${#SESSION_NAME} characters"
-
-
-          if [ ${#SESSION_NAME} -gt 64 ]; then
-              echo "❌ Session name too long!"
-              exit 1
-          fi
 
   deploy:
     runs-on: ubuntu-latest
