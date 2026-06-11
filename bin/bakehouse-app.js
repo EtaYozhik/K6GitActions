@@ -9,10 +9,22 @@ if (!stackName || !stackName.trim()) {
   process.exit(1)
 }
 
+const account =
+  process.env.CDK_DEFAULT_ACCOUNT ||
+  process.env.AWS_ACCOUNT_ID ||
+  process.env.AWS_ACCOUNT ||
+  'NOT_SET'
+
+const region =
+  process.env.CDK_DEFAULT_REGION ||
+  process.env.AWS_REGION ||
+  process.env.AWS_DEFAULT_REGION ||
+  'NOT_SET'
+
 const settings = {
   env: {
-    account: process.env.CDK_DEFAULT_ACCOUNT || 'NOT_SET',
-    region: process.env.CDK_DEFAULT_REGION || 'NOT_SET'
+    account,
+    region
   },
   stackName: stackName,
   certArn: cdk.Fn.importValue('CTASharedCertArn'), // SSL cert for HTTPS
@@ -20,8 +32,7 @@ const settings = {
   domainName: 'cta-training.academy', // Root domain
   subDomain: stackName.toLowerCase(),
   dbName: 'dev',
-  vpcName: 'CTASharedVPC-vpc',
-  sharedOriginRequestPolicyId: '6d7a8520-10b9-4b88-ae47-770229103b35'
+  vpcName: 'CTASharedVPC-vpc'
 }
 
 const app = new cdk.App();
@@ -35,7 +46,5 @@ new BakehouseStack(app,`${settings.stackName}-stack`,{
   certArn: settings.certArn,
   domainName: settings.domainName,
   dbName: settings.dbName,
-  vpcName: settings.vpcName,
-  sharedOriginRequestPolicyId: settings.sharedOriginRequestPolicyId
+  vpcName: settings.vpcName  
 });
-
