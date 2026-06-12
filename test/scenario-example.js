@@ -11,7 +11,7 @@ export const options = {
             startVUs: 0,
             stages: [
                 { duration: '30s', target: 10 },
-                { duration: '570s', target: 10 },
+                { duration: '30s', target: 10 },
             ],
             gracefulRampDown: '5s',
         },
@@ -21,7 +21,7 @@ export const options = {
             startVUs: 0,
             stages: [
                 { duration: '30s', target: 6 },
-                { duration: '570s', target: 6 },
+                { duration: '30s', target: 6 },
             ],
             gracefulRampDown: '5s',
         },
@@ -31,7 +31,7 @@ export const options = {
             startVUs: 0,
             stages: [
                 { duration: '30s', target: 8 },
-                { duration: '570s', target: 8 },
+                { duration: '30s', target: 8 },
             ],
             gracefulRampDown: '5s',
         },
@@ -41,7 +41,7 @@ export const options = {
             startVUs: 0,
             stages: [
                 { duration: '30s', target: 8 },
-                { duration: '570s', target: 8 },
+                { duration: '30s', target: 8 },
             ],
             gracefulRampDown: '5s',
         },
@@ -51,7 +51,7 @@ export const options = {
             startVUs: 0,
             stages: [
                 { duration: '30s', target: 8 },
-                { duration: '570s', target: 8 },
+                { duration: '30s', target: 8 },
             ],
             gracefulRampDown: '5s',
         },
@@ -61,7 +61,7 @@ export const options = {
             startVUs: 0,
             stages: [
                 { duration: '30s', target: 8 },
-                { duration: '570s', target: 8 },
+                { duration: '30s', target: 8 },
             ],
             gracefulRampDown: '5s',
         },
@@ -102,13 +102,13 @@ export function customerJourney() {
 
 
 export function makeChild() {
-    const randomNum = Math.floor(Math.random() * 100000);
+    const randomNum = Math.floor(Math.random() * 1000000);
     
     const packet = JSON.stringify({
         name: `Clem H Fandango ${randomNum}`,
         email: `clem.H.fandango.${randomNum}@gmail.com`
     });
-
+    sleep(5);
     const params = {
         headers: { 
             'Content-Type': 'application/json',
@@ -119,6 +119,7 @@ export function makeChild() {
     };
 
     http.post('https://carter-singh-bakehouse.cta-training.academy/api/customers', packet, params);
+    sleep(5);
 }
 
 
@@ -136,6 +137,7 @@ export function makeOrder() {
             }
         ]
     });
+    sleep(5);
 
     const params = {
         headers: { 
@@ -147,11 +149,13 @@ export function makeOrder() {
     };
 
     http.post('https://carter-singh-bakehouse.cta-training.academy/api/orders', packet, params);
+    sleep(5);
 }
 
 
 export function createProduct() {
-    const randomNum = Math.floor(Math.random() * 100000);
+    const randomNum = Math.floor(Math.random() * 1000000);
+    sleep(5);
     
     const packet = JSON.stringify({
         productId: `clem_fandango_${randomNum}`,
@@ -171,6 +175,7 @@ export function createProduct() {
     };
 
     http.post('https://carter-singh-bakehouse.cta-training.academy/api/products', packet, params);
+    sleep(5);
 }
 
 
