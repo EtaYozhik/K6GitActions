@@ -12,7 +12,7 @@ permissions:
 env:
   AWS_REGION: eu-west-2
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true 
-  BAKEHOUSE_STACK_NAME: carter-singh-bakehouse # Added your stack name here
+  BAKEHOUSE_STACK_NAME: carter-singh-bakehouse
 
 jobs:
   setup:
@@ -49,16 +49,10 @@ jobs:
       - name: Generate enhanced session name
         id: session-naming
         run: |
-          # Clean username for valid AWS characters (Alphanumeric, =,.@_-)
           STUDENT=$(echo "${{ github.actor }}" | sed 's/[^a-zA-Z0-9=,.@_-]//g')
           RUN_ID="${{ github.run_id }}"
-          
-          # Create base name
           BASE_NAME="gha-cdk-${STUDENT}-${RUN_ID}"
-          
-          # Strictly truncate to 64 characters maximum
           SESSION_NAME=$(echo "${BASE_NAME}" | cut -c 1-64)
-
           echo "session-name=${SESSION_NAME}" >> $GITHUB_OUTPUT
           echo "Generated safe session name: ${SESSION_NAME}"
           echo "Length: ${#SESSION_NAME} characters"
@@ -69,6 +63,31 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      # STEP 1: Wipe heavy pre-installed runner software to maximize disk cache
+      - name: Free Disk Space
+        run: |
+          echo "Before clearing space:"
+          df -h
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          echo "After clearing space:"
+          df -h
+
+      # STEP 2: Clear any existing buildkit cached memory states
+      - name: Prune Docker build cache
+        run: docker builder prune -a -f
+
+      # STEP 3: Ensure Docker uses single-thread extraction to stop OOM crashes
+      - name: Build and Deploy via CDK
+        run: |
+          export DOCKER_BUILDKIT=1
+          cdk deploy --require-approval never
+        env:
+          GOMAXPROCS: "1"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
