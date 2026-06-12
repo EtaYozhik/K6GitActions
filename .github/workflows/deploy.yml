@@ -64,37 +64,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # STEP 1: Wipe heavy pre-installed runner software to maximize disk cache
+      # 1. Clear massive pre-installed software to maximize disk cache
       - name: Free Disk Space
         run: |
-          echo "Before clearing space:"
-          df -h
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf /usr/local/lib/android
           sudo rm -rf /opt/ghc
           sudo rm -rf /usr/local/share/boost
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-          echo "After clearing space:"
-          df -h
 
-      # STEP 2: Clear any existing buildkit cached memory states
+      # 2. Clear any lingering buildkit states
       - name: Prune Docker build cache
         run: docker builder prune -a -f
 
-      # STEP 3: Ensure Docker uses single-thread extraction to stop OOM crashes
-      - name: Build and Deploy via CDK
-        run: |
-          export DOCKER_BUILDKIT=1
-          cdk deploy --require-approval never
-        env:
-          GOMAXPROCS: "1"
-
+      # 3. Setup the Node environment
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
+      # 4. Install local dependencies
       - name: Install dependencies
         run: npm ci
 
@@ -104,6 +94,7 @@ jobs:
           echo "Ref: ${{ github.ref }}"
           echo "Actor: ${{ github.actor }}"
 
+      # 5. Connect to AWS
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -120,8 +111,14 @@ jobs:
           ROLE_SESSION=$(echo "${IDENTITY}" | jq -r '.Arn' | grep -oP '(?<=/)[^/]+$')
           echo "Current session: ${ROLE_SESSION}"
 
+      # 6. Install the CDK CLI tool globally
       - name: Install AWS CDK
         run: npm install -g aws-cdk
 
+      # 7. Run deployment with low-concurrency settings to prevent OOM
       - name: CDK Deploy
-        run: cdk deploy --require-approval never
+        run: |
+          export DOCKER_BUILDKIT=1
+          cdk deploy --require-approval never
+        env:
+          GOMAXPROCS: "1"
